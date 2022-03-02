@@ -1,0 +1,30 @@
+name: Perform CI checks
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Clean workspace
+              shell: bash
+              run: rm -rf ..?* .[!.]* *
+
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Setup .NET CLI
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: 5.0.x
+                  owner: ${{ secrets.CPCHEM_PACKAGES_USERNAME }}
+                  source-url: ${{ secrets.CPCHEM_NUGET_REGISTRY_URL }}
+              env:
+                  NUGET_AUTH_TOKEN: ${{ secrets.CPCHEM_PACKAGES_PAT }}
+
+            - name: Build and test .NET Core application
+              uses: ./.github/action-build.yaml
